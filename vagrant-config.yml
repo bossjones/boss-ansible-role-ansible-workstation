@@ -1,0 +1,19 @@
+# https://gist.github.com/gnarf/b103e77f37236ca72d8e
+:vms:
+  ansible-workstation1:
+    :hostname: "ansible-workstation1"
+    :ip: "192.168.50.107"
+    :ram: 2048
+    :cpu: 2
+    :box: "ubuntu/xenial64"
+    :id: 10
+
+:groups:
+  ansible-workstation1:
+    - ansible-workstation1
+  servers:
+    - ansible-workstation1
+  kubernetes-ansible-workstation1:
+    - ansible-workstation1
+  kubernetes:
+    - ansible-workstation1
