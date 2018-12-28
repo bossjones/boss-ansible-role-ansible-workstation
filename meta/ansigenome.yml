@@ -1,0 +1,25 @@
+---
+
+ansigenome_info:
+  github_url: "https://github.com/bossjones/boss-ansible-role-ansible-workstation"
+  git_branch: "master"
+  galaxy_id: "1550"
+
+  travis: True
+
+  license_url: 'https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)'
+
+  authors:
+    - name:  'Malcolm Jones'
+      url: ''
+      email: 'jarvis@theblacktonystark.com'
+      github: 'tonydarksjarvis'
+
+  synopsis: |
+    `boss-ansible-role-workstation` is an Ansible role which builds and installs Debian
+    package with specified Ansible version (by default, `devel`). It can be
+    used to easily create remote Ansible Controller host or test your playbooks
+    on a `devel` Ansible version in a container or VM.
+
+    If `redis-server` is found on managed host, this role will automatically
+    enable support for host fact caching in Ansible.
