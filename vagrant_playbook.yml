@@ -1,9 +1,9 @@
 ---
 ##############################################################################
-# SERVERS: Install and configure wireshark
+# SERVERS: Install and configure ansible-controller
 ##############################################################################
 - hosts: servers
-  name: servers install etckeeper
+  name: servers install ansible-controller
   gather_facts: False
   become: yes
   become_method: sudo

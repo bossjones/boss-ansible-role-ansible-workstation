@@ -1,0 +1,10 @@
+
+# First install exact version of ansible
+- name: Bootstrap a host without python2 installed
+  raw: sudo apt-get update; sudo apt-get upgrade -y; sudo apt-get install -y asciidoc build-essential cdbs debhelper devscripts dpkg-dev fakeroot git python-httplib2 python-jinja2 python-nose python-paramiko python-passlib python-setuptools python-yaml sshpass xmlto python3-dev python-dev python3-pip python-pip curl ca-certificates bash-completion
+
+- name: upgrade pip3
+  raw: sudo curl https://bootstrap.pypa.io/get-pip.py | python3
+
+- name: upgrade pip2
+  raw: sudo pip2 install --upgrade pip

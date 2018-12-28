@@ -1,9 +1,25 @@
 ---
-- include_tasks: facts.yml
 
-# First install exact version of ansible
-- name: Bootstrap a host without python2 installed
-  raw: sudo apt-get update; sudo apt-get upgrade -y; sudo apt-get install -y asciidoc build-essential cdbs debhelper devscripts dpkg-dev fakeroot git python-httplib2 python-jinja2 python-nose python-paramiko python-passlib python-setuptools python-support python-yaml sshpass xmlto
+- include_tasks: "{{boss__ansible__workstation__default_install_type}}.yml"
+
+# python3-dev python-dev python3-pip python-pip
+
+# # https://github.com/nodesource/distributions/blob/master/README.md
+# - name: Install latest python pip for python3 and python2
+#   shell: |
+#     curl https://bootstrap.pypa.io/get-pip.py | python3
+#     pip2 install --upgrade pip
+#   become: '{{ item }}'
+#   args:
+#     executable: /bin/bash
+#   with_items:
+#     - true  # Run as root
+#   ignore_errors: yes
+#   tags:
+#   - pip
+#   - python-pip
+
+# - include_tasks: facts.yml
 
 # - name: Add .ssh directories
 #   file:

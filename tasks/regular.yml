@@ -1,0 +1,222 @@
+---
+
+# First install exact version of ansible
+
+# https://github.com/nodesource/distributions/blob/master/README.md
+# - name: bootstrap host with ansible - using shell on purpose to speed up install
+#   shell: |
+#     sudo apt-get update; sudo apt-get upgrade -y; sudo apt-get install -y asciidoc build-essential cdbs debhelper devscripts dpkg-dev fakeroot git python-httplib2 python-jinja2 python-nose python-paramiko python-passlib python-setuptools python-yaml sshpass xmlto python3-dev python-dev python3-pip python-pip curl ca-certificates bash-completion
+#     sudo curl https://bootstrap.pypa.io/get-pip.py | python3
+#     sudo pip2 install --upgrade pip
+#   become: '{{ item }}'
+#   args:
+#     executable: /bin/bash
+#   with_items:
+#     - true  # Run as root
+#   ignore_errors: yes
+#   tags:
+#   - pip
+#   - python-pip
+
+- name: Upgrade all packages to the latest version
+  apt:
+    name: "*"
+    state: latest
+    force_apt_get: yes
+    update_cache: yes
+    cache_valid_time: 86400 #One day
+  become_user: 'root'
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+
+- name: Install required packages
+  apt: pkg={{ item }} state=latest install_recommends=no
+  with_items:
+  - asciidoc
+  - build-essential
+  - cdbs
+  - debhelper
+  - devscripts
+  - dpkg-dev
+  - fakeroot
+  - git
+  # - python-httplib2
+  # - python-jinja2
+  # - python-nose
+  # - python-paramiko
+  # - python-passlib
+  # - python-setuptools
+  # - python-yaml
+  - sshpass
+  # - xmlto
+  - python3-dev
+  - python-dev
+  - python3-pip
+  - python-pip
+  - curl
+  - ca-certificates
+  - bash-completion
+
+- name: bootstrap host with ansible - using shell on purpose to speed up install
+  shell: |
+    sudo curl https://bootstrap.pypa.io/get-pip.py | python3
+    sudo pip2 install --upgrade pip
+  args:
+    executable: /bin/bash
+  ignore_errors: yes
+  become: '{{ item }}'
+  become_user: 'root'
+  with_items:
+    - true  # Run as root
+  tags:
+  - pip
+  - python-pip
+
+# - include_tasks: facts.yml
+
+- name: Get user home directory
+  shell: echo $HOME
+  register: boss__ansible__workstation__role_ansible_user_home
+  # changed_when: False
+  become_user: '{{ bossjones__user }}'
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+
+- name: Add .ssh directories
+  file:
+    path: "~{{ bossjones__user }}/.ssh"
+    state: "directory"
+    mode: "0700"
+    owner: "{{bossjones__user}}"
+    group: "{{bossjones__user}}"
+  # with_items: boss__ansible__workstation__users
+  become_user: 'root'
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+
+
+- name: "add vagrant id_rsa key"
+  template:
+    src: "id_rsa.j2"
+    dest: "~{{ bossjones__user }}/.ssh/id_rsa"
+    mode: "0600"
+    owner: "{{bossjones__user}}"
+    group: "{{bossjones__group}}"
+  ignore_errors: yes
+  # become_user: "{{bossjones__user}}"
+  # become: '{{ item }}'
+  # with_items:
+  #   - true  # Run as vagrant
+  become_user: 'root'
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+
+- name: "add vagrant id_rsa.pub key"
+  template:
+    src: "id_rsa.pub.j2"
+    dest: "~{{ bossjones__user }}/.ssh/id_rsa.pub"
+    mode: "0644"
+    owner: "{{bossjones__user}}"
+    group: "{{bossjones__group}}"
+  ignore_errors: yes
+  # become: '{{ item }}'
+  # become_user: "{{bossjones__user}}"
+  # with_items:
+  #   - true  # Run as vagrant
+  become_user: 'root'
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+
+# Install (ansible) while ensuring the umask is 0022 (to ensure other users can use it)
+- name: Install ansible
+  pip:
+    name: "ansible=={{boss__ansible__workstation__role_ansible_version}}"
+    umask: "0022"
+    # extra_args: --user
+    # executable: pip-3.3
+
+### --------------------------
+
+# - name: Install required packages
+#   apt: pkg={{ item }} state=latest install_recommends=no
+#   with_items: [ 'git', 'python-paramiko', 'python-yaml', 'python-jinja2', 'python-httplib2',
+#                 'cdbs', 'debhelper', 'dpkg-dev', 'python-support', 'fakeroot', 'sshpass',
+#                 'python-nose', 'python-passlib', 'python-setuptools', 'asciidoc', 'xmlto',
+#                 'devscripts', 'build-essential' ]
+
+# - name: Get user home directory
+#   shell: echo $HOME
+#   register: boss__ansible__workstation__role_ansible_user_home
+#   changed_when: False
+#   become_user: '{{ bossjones__user }}'
+
+# - name: Clone Ansible repository
+#   git: repo={{ role_ansible_git_repository }} dest={{ bossjones__user }}/{{ role_ansible_build_path }}
+#        version={{ boss__ansible__workstation__role_ansible_version }} update=yes
+#   register: boss__ansible__workstation__role_ansible_git
+#   become_user: '{{ bossjones__user }}'
+
+# - name: Get current Ansible version
+#   slurp: src={{ bossjones__user }}/{{ boss__ansible__workstation__role_ansible_build_path }}/VERSION
+#   register: boss__ansible__workstation__role_ansible_build_version
+
+# - name: Set Ansible package version
+#   set_fact:
+#     boss__ansible__workstation__role_ansible_package_version: '{{ boss__ansible__workstation__role_ansible_build_version.content | b64decode | trim }}'
+
+# - name: Build Ansible .deb package
+#   command: make deb chdir={{ bossjones__user }}/{{ boss__ansible__workstation__role_ansible_build_path }}
+#   register: boss__ansible__workstation__role_ansible_build
+#   when: boss__ansible__workstation__role_ansible_git is defined and boss__ansible__workstation__role_ansible_git.changed == True
+#   become_user: '{{ bossjones__user }}'
+
+# - name: Check if new style .deb package is present
+#   shell: find {{ bossjones__user }}/{{ boss__ansible__workstation__role_ansible_build_path }}/deb-build/unstable/ -name 'ansible_{{ boss__ansible__workstation__role_ansible_package_version }}-*_all.deb' 2>/dev/null || true
+#   register: boss__ansible__workstation__role_ansible_register_new_deb
+#   when: (boss__ansible__workstation__role_ansible_build is defined and boss__ansible__workstation__role_ansible_build.changed)
+
+# - name: Check if old style .deb package is present
+#   shell: find {{ bossjones__user }}/{{ boss__ansible__workstation__role_ansible_build_path }}/../ -name 'ansible_{{ boss__ansible__workstation__role_ansible_package_version }}_all.deb' 2>/dev/null || true
+#   register: boss__ansible__workstation__role_ansible_register_old_deb
+#   when: (boss__ansible__workstation__role_ansible_build is defined and boss__ansible__workstation__role_ansible_build.changed)
+
+# - name: Install Ansible .deb package (new version)
+#   shell: dpkg -i {{ bossjones__user }}/{{ boss__ansible__workstation__role_ansible_build_path }}/deb-build/unstable/ansible_{{ boss__ansible__workstation__role_ansible_package_version }}-*_all.deb
+#   when: boss__ansible__workstation__role_ansible_register_new_deb is defined and boss__ansible__workstation__role_ansible_register_new_deb.stdout != ""
+
+# - name: Install Ansible .deb package (old version)
+#   shell: dpkg -i {{ bossjones__user }}/{{ boss__ansible__workstation__role_ansible_build_path }}/../ansible_{{ boss__ansible__workstation__role_ansible_package_version }}_all.deb
+#   when: boss__ansible__workstation__role_ansible_register_old_deb is defined and boss__ansible__workstation__role_ansible_register_old_deb.stdout != ""
+
+# - name: Check if Redis is installed
+#   stat: path=/usr/bin/redis-server
+#   register: boss__ansible__workstation__role_ansible_register_redis
+
+# - name: Enable Redis fact caching in Ansible
+#   set_fact:
+#     boss__ansible__workstation__role_ansible_fact_caching: 'redis'
+#   when: (boss__ansible__workstation__role_ansible_register_redis is defined and boss__ansible__workstation__role_ansible_register_redis.stat.exists)
+
+# - name: Install packages required for Redis support
+#   apt:
+#     name: 'python-redis'
+#     state: 'latest'
+#     install_recommends: False
+#   when: (boss__ansible__workstation__role_ansible_register_redis is defined and boss__ansible__workstation__role_ansible_register_redis.stat.exists)
+
+# - name: Divert original Ansible configuration
+#   command: dpkg-divert --quiet --local --divert /etc/ansible/ansible.cfg.dpkg-divert --rename /etc/ansible/ansible.cfg
+#            creates=/etc/ansible/ansible.cfg.dpkg-divert
+
+- name: Configure /etc/ansible/ansible.cfg
+  template:
+    src: 'etc/ansible/ansible.cfg.j2'
+    dest: '/etc/ansible/ansible.cfg'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'

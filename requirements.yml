@@ -8,6 +8,9 @@
 - src: https://github.com/bossjones/boss-ansible-role-debug
 - src: https://github.com/bossjones/boss-ansible-role-journald
 - src: https://github.com/bossjones/boss-ansible-role-ntp
+- src: https://github.com/bossjones/boss-ansible-role-tools
+- src: https://github.com/bossjones/boss-ansible-role-nfs
+- src: https://github.com/bossjones/boss-ansible-role-update-hosts
 - src: https://www.github.com/mrlesmithjr/ansible-ntp.git
 - src: https://www.github.com/mrlesmithjr/ansible-timezone.git
 - src: https://www.github.com/mrlesmithjr/ansible-motd

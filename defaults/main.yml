@@ -5,7 +5,7 @@ boss__ansible__workstation__users:
     sudoer: yes
     ssh_keys: yes
 
-
+boss__ansible__workstation__default_install_type: 'regular'
 
 bossjones__user: vagrant
 bossjones__group: vagrant
